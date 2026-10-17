@@ -1,5 +1,14 @@
 # Aasra progress
 
+## Current requested expansion
+
+1. Complete — verified public `vaibhav91-dev/aasra`; authenticated Vercel and created/linked `pwp3/aasra`; Neon database provisioned after user terms acceptance.
+2. Complete — username/password accounts, per-user saved earnings/chats/grievance forms and drafts, reviewed device import, autosave/retry/conflict handling.
+3. Complete — migrations; 40 automated tests, lint/typecheck/build; real database auth/persistence/isolation/re-login tests; temporary accounts removed.
+4. In progress — push source, publish to Vercel, verify deployed account/data and real Gemini flows. See DEPLOYMENT.md for current evidence.
+
+## Initial MVP phases (historical)
+
 1. Complete — Next.js, visual system, navigation, English/Hindi/Punjabi. Lint and strict typecheck pass.
 2. Complete — earnings, validated persistence, deterministic dashboard; 8 tests, lint and typecheck pass.
 3. Complete — server Gemini endpoint and session-only assistant; 21 tests, lint and typecheck pass. Real Gemini verification awaits a key.

@@ -5,3 +5,8 @@ node_modules/
 .vercel/
 coverage/
 *.tsbuildinfo
+
+.agents/
+skills-lock.json
+
+.env*

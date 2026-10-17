@@ -285,7 +285,7 @@ export function Earnings({
   summary: EarningsSummary;
   language: Language;
   t: Strings;
-  onSave: (e: Entry) => boolean;
+  onSave: (e: Entry) => boolean | Promise<boolean>;
   onDelete: (e: Entry) => void;
   onExplain: () => void;
   onConcern: () => void;
@@ -295,7 +295,8 @@ export function Earnings({
     [amount, setAmount] = useState(""),
     [date, setDate] = useState(indiaToday),
     [category, setCategory] = useState<string>("delivery"),
-    [error, setError] = useState(false);
+    [error, setError] = useState(false),
+    [saving, setSaving] = useState(false);
   function reset() {
     setEditing(null);
     setAmount("");
@@ -311,8 +312,9 @@ export function Earnings({
         <h2>{editing ? t.edit : t.add}</h2>
         <form
           className="form-grid"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
+            if (saving) return;
             const amountPaise = parseAmount(amount);
             const entry = {
               id: editing ?? crypto.randomUUID(),
@@ -325,7 +327,12 @@ export function Earnings({
               setError(true);
               return;
             }
-            if (onSave(entry)) reset();
+            setSaving(true);
+            try {
+              if (await onSave(entry)) reset();
+            } finally {
+              setSaving(false);
+            }
           }}
         >
           <label className="field">
@@ -385,7 +392,7 @@ export function Earnings({
             </p>
           )}
           <div className="button-row full">
-            <button className="button" type="submit">
+            <button className="button" type="submit" disabled={saving}>
               {t.save}
             </button>
             {editing && (

@@ -10,6 +10,7 @@ import {
 } from "@/lib/api-validation";
 import { indiaToday } from "@/lib/earnings";
 import type { Language, Strings } from "@/lib/i18n";
+import { accountStrings } from "@/lib/account-i18n";
 export type GrievanceState = {
   facts: GrievanceFacts;
   draft: string;
@@ -39,11 +40,13 @@ export function Grievance({
   setState,
   t,
   language,
+  persisted = false,
 }: {
   state: GrievanceState;
   setState: React.Dispatch<React.SetStateAction<GrievanceState>>;
   t: Strings;
   language: Language;
+  persisted?: boolean;
 }) {
   const lock = useRef(false);
   const [copyStatus, setCopyStatus] = useState("");
@@ -253,7 +256,9 @@ export function Grievance({
             )}
           </div>
         </form>
-        <p className="muted">{t.refresh}</p>
+        <p className="muted">
+          {persisted ? accountStrings[language].privacy : t.refresh}
+        </p>
       </section>
       {state.draft && (
         <section className="card">

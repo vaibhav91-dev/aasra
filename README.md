@@ -2,85 +2,91 @@
 
 **AI Saathi for Gig Workers**
 
-A mobile-first companion for Indian delivery partners, drivers, daily-wage workers, and other informal workers. Record earnings, understand expenses, ask practical questions, explain a pasted document, and prepare a respectful grievance draft.
+A multilingual companion for Indian gig and informal workers: earnings tracking, practical AI guidance, document explanations, and editable grievance drafts.
 
-## Run locally
+## Accounts and saved records
 
-Use **Node.js 24.x LTS** and npm. The application uses Next.js App Router, strict TypeScript, Tailwind CSS 4, Lucide, and server-side native `fetch` to Gemini. No database or separate backend is needed.
+Open **Account & backup** to create an account with an email, username and password. Sign in using the **username and password**. Passwords require 12–128 characters and are hashed by Better Auth. Email verification and password-recovery delivery are not configured yet; the signup form says so.
+
+When signed in, earnings, completed chat messages, and grievance forms/drafts are saved in Neon Postgres under the authenticated account. They load again after refresh and on another device. Pasted document text and unsent questions remain session-only. Wait for **All changes saved to your account** before refreshing; failed saves preserve screen work and expose Retry. A stale-tab conflict stops saving and asks you to copy unsaved work before reloading.
+
+Guest mode keeps earnings in validated browser localStorage. Guest chats/documents/grievances clear on refresh. Localhost and the deployed URL have separate browser storage. **Import device earnings** shows the local record count and asks for confirmation before importing; it never silently merges someone else's records or deletes the original device copy. Sign out clears account work from the screen and restores guest device entries.
+
+The public GitHub repository contains source code only. Passwords, database contents, API keys, and `.env.local` are never committed.
+
+## Local setup
+
+Use **Node.js 24.x LTS** and npm.
 
 ```powershell
 npm ci
 Copy-Item .env.example .env.local
-# Edit .env.local privately to add your Gemini key.
+# Configure the values below privately, then:
+npm run db:migrate
 npm run dev
 ```
 
-On macOS/Linux use `cp .env.example .env.local` instead. Open [localhost:3000](http://localhost:3000).
+On macOS/Linux use `cp` instead of `Copy-Item`. If Vercel already manages the database, use `npx vercel env pull .env.local` instead of replacing existing private configuration. Set the local `BETTER_AUTH_URL` to `http://localhost:3000`. Open [localhost:3000](http://localhost:3000).
 
-The dashboard and earnings tracker work without a Gemini key. AI requests return a clear configuration error until a key is configured. Never paste a key into chat, put it in a `NEXT_PUBLIC_` variable, or commit `.env.local`.
+| Variable                | Purpose                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | Pooled Postgres URL for request traffic, supplied by Neon/Vercel                |
+| `DATABASE_URL_UNPOOLED` | Direct URL for schema migrations                                                |
+| `BETTER_AUTH_SECRET`    | Strong random secret, at least 32 characters; server-only                       |
+| `BETTER_AUTH_URL`       | Exact local or production origin; Preview uses Vercel's own deployment hostname |
+| `GEMINI_API_KEY`        | Server-only key from [Google AI Studio](https://aistudio.google.com/apikey)     |
+| `GEMINI_MODEL`          | Defaults to `gemini-3.5-flash-lite`                                             |
 
-### Gemini setup
+Missing database/auth settings leave device earnings usable and show an honest cloud configuration message. Missing Gemini configuration produces a clear error; no fake AI response is generated. Builds do not require secrets. Never prefix secrets with `NEXT_PUBLIC_` or paste them into chat.
 
-1. Obtain a Gemini API key in [Google AI Studio](https://aistudio.google.com/apikey). Review Google's terms, data-use settings, and account billing before sending real worker information.
-2. In the ignored `.env.local` file, set `GEMINI_API_KEY` to that key.
-3. Set `GEMINI_MODEL=gemini-3.5-flash-lite`, or another supported stable text model available to your account. Restart the local server after changing environment variables.
+The default model was selected from [Google's official stable model documentation](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite), checked 17 October 2026, for low latency and cost. Access and quotas depend on the Google project. There is no silent provider/model fallback.
 
-The default was selected from [Google's official model documentation](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite), checked on 17 October 2026: a stable model aimed at low latency and low cost. Model access, quotas, and availability depend on your Google project. There is no silent model/provider fallback or fake AI answer.
+## Architecture
 
-## Workflows
+- Next.js App Router, strict TypeScript, Tailwind CSS 4, Lucide React, npm lockfile.
+- Better Auth with its username plugin; HTTP-only session cookies; database-backed auth rate limits. Each data endpoint verifies the session and derives ownership from it, never a client-supplied user ID.
+- Neon Postgres through `pg`, with a small reusable pool and Vercel's pool lifecycle helper. Runtime SQL is parameterized. `aasra_worker_data` stores a validated versioned JSON snapshot per user. Revision checks reject stale writes with 409 instead of silently overwriting newer records.
+- `scripts/migrate.ts` uses Better Auth's version-matched migration planner plus the worker-data table. It runs explicitly after project/environment verification, uses the direct connection when available, and is not run on every request or deployment build. Review schema changes before applying them to an existing production database.
+- Gemini is called only through the Node.js `POST /api/ai` route with native server `fetch`; prompts and keys stay server-side.
+- No separate backend, Docker, writable server disk, static export, database proxy service, or client-side database credentials.
 
-- **Earnings → guidance:** add income/expenses → dashboard updates → Explain my earnings → inspect the exact seven-day summary → confirm sharing with Google Gemini → read guidance. Individual transactions are not sent.
-- **Earnings → grievance:** open a payment concern → enter or confirm the disputed amount and facts → generate a draft. A gap in records is never treated as proof of nonpayment.
-- **Document → grievance:** paste redacted text → review the sharing notice and confirm → explain → choose Draft a grievance about this → select relevant source facts yourself → confirm → review the prefilled form → generate → edit → copy. The original source remains available in the fact review dialog.
-- **Multilingual help:** English, Hindi (Devanagari), and Punjabi (Gurmukhi) navigation, forms, status messages, prompts, and AI response language. Changing interface language also resets the output-language override for subsequent grievances.
-- **Voice:** offered only if the browser exposes speech recognition; click to start, review recognized text in the editable field, then send. Browser/online-service support and microphone permission are required. Voice is never automatically sent.
+## Connected workflows
 
-Nothing submits a complaint, files an application, contacts an employer, or reaches an external organization on the worker's behalf.
+1. Add income/expenses → accurate seven-day dashboard → Explain my earnings → review the exact calculated summary → confirm sharing with Google Gemini → grounded guidance.
+2. Earnings payment concern → enter or confirm the amount and facts → grievance form. Recording gaps are never treated as proof of nonpayment.
+3. Paste redacted document text → confirm privacy review → explanation → choose source facts yourself → confirm transfer → review prefilled grievance → generate → edit → copy. Nothing is submitted externally.
+4. Change English/Hindi/Punjabi → navigation, forms, errors, prompts and subsequent AI responses use the selected language. Hindi uses Devanagari; Punjabi uses Gurmukhi.
+5. Voice appears only in supported browsers. Click to listen, stop, and review editable recognized text before sending. It can require a browser speech service and internet access.
 
-## Financial rules and persistence
+## Financial correctness
 
-- Money is stored as integer paise. Positive decimal input accepts up to two places, capped at ₹10 lakh per entry. The tracker permits up to 10,000 entries, keeping all aggregates within safe integer bounds.
-- Dates are `YYYY-MM-DD`, valid calendar dates from 1900 through today. Reporting uses `Asia/Kolkata`: today plus the previous six calendar days, including zero-entry days.
-- Income, expenses, net, daily figures, and counts are computed in code. Negative net is allowed. All-time records are distinct from seven-day totals. Zero recorded earnings never claims the worker earned nothing.
-- `aasra-earnings-v1` stores only a versioned list of ID, type, amount, date, and predefined category. There are no worker/employer names, arbitrary notes, or documents in entries.
-- `aasra-language` stores the language preference. These are the only application localStorage keys.
-- Data is validated on load, including categories, IDs, bounds, dates, unknown fields, and duplicate IDs. Invalid saved data is not overwritten. Use the browser's site-storage controls to remove the `aasra-earnings-v1` key if corrupt. This deletes local earnings, so preserve anything needed first.
-- Failed writes show an error and leave the form intact. Success appears only after a successful storage write. Deletions require confirmation.
-- Local storage is device/browser specific, unencrypted, and accessible to other people using that browser profile. There is no cloud backup, account, or cross-device sync. Avoid shared devices for private earnings.
-- Chats, pasted documents, fact selections, grievance forms, and drafts stay in React memory across section navigation and are cleared by a full refresh. They are not written to localStorage, cookies, logs, or server storage. Submitted text is transmitted to Google Gemini; Google handles it under the applicable service terms. Browser speech services may process voice separately.
+Amounts are integer paise, accepting positive decimal strings with at most two decimal places. Each entry is capped at ₹10 lakh and there are at most 10,000 entries. Calendar dates use `YYYY-MM-DD`; reporting uses `Asia/Kolkata`, today plus the preceding six days, including zero-entry days. All-time entries are separately labeled. Code computes income, expense, net and daily totals; negative net is allowed. Zero recorded earnings never claims the worker earned nothing.
 
-## API and security
+Device records contain only an ID, income/expense type, amount, date and predefined category. Storage validation rejects malformed JSON, unknown entry fields, bad IDs/categories/dates/amounts and duplicate IDs. Failed writes never claim success, and the earnings form remains available. Delete requires confirmation.
 
-`POST /api/ai` in `app/api/ai/route.ts` is a Node.js route with a 30-second function duration. Credentials are checked only when a request arrives, so builds succeed without a key. `lib/gemini.ts` is protected by Next.js's `server-only` import guard.
+## Privacy and safety
 
-The discriminated request union allows only `chat`, `earnings-explanation`, `document-explanation`, and `grievance-draft`, the three supported languages, and expected fields. It rejects arbitrary system messages and invalid/oversized inputs. Summary arithmetic and daily totals are checked for consistency on the server; the browser remains the source of recorded data.
+Signed-in records contain private earnings, chat and grievance content. They are accessible to the account and server/database administrators under the hosting providers' policies; they are not end-to-end encrypted. Avoid identity numbers, bank details and unnecessary personal information. Pasted document text is not saved. Text submitted for AI is transmitted to Google Gemini under Google's applicable service terms. Browser speech services can process voice separately.
 
-Limits: 96,000-byte request body enforced while streaming, before JSON parsing; 3,000 characters per user message; 20 history messages and 24,000 total history characters; 8,000 document characters; grievance field limits shown in forms; 2,200 output tokens; a 25-second provider timeout. There are no automatic retries or parallel AI calls. Explicit UI retry preserves the input. Clear chat when the history limit is reached.
+Guest localStorage is device/browser-specific, unencrypted, and accessible to others using the profile. It is not a cloud backup. The keys are `aasra-earnings-v1` and `aasra-language`. If corrupt device records are detected, they are not overwritten; preserve anything needed before removing that key through browser site-storage controls.
 
-Responses use `Cache-Control: no-store`. Clear cross-origin browser requests are rejected; no permissive CORS headers are set. Provider errors and secrets are not returned or logged. Responses are rendered as safe text, never raw HTML. Headers include `nosniff`, frame denial, and a conservative referrer policy.
+AI is not a verified legal/benefits source. No live legal or scheme retrieval is performed. Check official sources; the assistant must not invent citations, deadlines, eligibility, evidence, legal sections or earnings. Document text is untrusted material, not system instructions. System prompts reduce some risks but do not guarantee accuracy or injection resistance. Grievances are drafts only; no employer or external organization is contacted.
 
-| Error code  | HTTP | Meaning                                                     |
-| ----------- | ---- | ----------------------------------------------------------- |
-| INVALID     | 400  | Invalid JSON, task, fields, roles, dates, amounts, or input |
-| TOO_LARGE   | 413  | Request body exceeds the byte limit                         |
-| ORIGIN      | 403  | Clearly cross-origin browser request                        |
-| CONFIG      | 503  | Missing server Gemini key                                   |
-| CREDENTIALS | 503  | Provider rejected the server key; not a user login issue    |
-| MODEL       | 503  | Unsupported/unavailable configured model                    |
-| QUOTA       | 429  | Provider quota or rate limit                                |
-| TIMEOUT     | 504  | Provider timed out                                          |
-| UPSTREAM    | 502  | Network, invalid provider JSON, or upstream service failure |
-| EMPTY       | 502  | Blocked, empty, truncated, or unusable provider output      |
+## Request limits and errors
 
-### Before public use
+AI: 96,000-byte streamed request limit before JSON parsing; 3,000 characters per user message; at most 20 history messages and 24,000 history characters; 8,000 document characters; bounded grievance fields; 2,200 output tokens; 25-second provider timeout within a 30-second Vercel function. No automatic provider retries or parallel model calls. Explicit retry retains work. Clear the conversation when its limit is reached.
 
-This unauthenticated MVP has **no durable application rate limiter**. Origin checks and UI submission locks do not prevent scripted abuse, distributed traffic, or provider costs. In-memory limits are unreliable across Vercel instances and restarts and would not solve this problem.
+Account endpoints: 16,000-byte auth body bound; 2,500,000-byte saved snapshot bound; strict snapshot shape and field/history limits; per-user authorization; revision conflict detection. Saved partial grievance forms can be incomplete, but generation separately validates all required facts.
 
-Configure a [Vercel WAF rate-limit rule](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting) matching `POST /api/ai` and count requests by source IP, with a conservative limit appropriate for your demo. Test shared-network behavior and monitor false positives. Vercel counters are regional and do not provide a global spending cap. Consider Deployment Protection for a limited judging/demo audience. No external security settings were changed by this project.
+Errors are sanitized and AI/account responses are non-cacheable. API failures distinguish invalid data, size/origin rejection, missing configuration, server credential/model problems, quota, timeout, upstream/empty output, missing sign-in and stale versions. Raw HTML is never rendered. Response headers include `nosniff`, frame denial and a conservative referrer policy. Sensitive prompts, passwords and database URLs are not logged by application code.
 
-Review [Gemini project rate limits](https://ai.google.dev/gemini-api/docs/rate-limits), set available quotas, restrict the API key to the intended service, and configure billing alerts in the linked billing project. **Alerts are notifications, not hard spending caps.** Monitor usage and revoke/rotate a compromised key. Do not log bodies, prompts, documents, drafts, authorization headers, or provider payloads.
+### Public endpoint controls
 
-System instructions reduce some failure modes; they do not guarantee factual correctness or resistance to prompt injection. This app does not retrieve current authoritative legal or scheme sources. Guidance must be checked with relevant official sources; eligibility, deadlines, legal consequences, and AI-generated drafts require human review.
+Auth rate limits use Postgres so they survive separate server instances. Their source-address accuracy depends on trusted proxy forwarding. The AI endpoint remains publicly callable and has no durable application rate limiter; cross-origin checks and UI submission locks do not prevent scripted abuse or provider charges. The data endpoint requires login but also benefits from infrastructure limits.
+
+Configure a [Vercel WAF rate-limit rule](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting) for `POST /api/ai` and appropriate account/data routes before broad public sharing. Monitor false positives on shared worker networks. Regional counters are not a global cost cap. In-memory rate limiting would not be reliable across Vercel instances.
+
+Review [Gemini project rate limits](https://ai.google.dev/gemini-api/docs/rate-limits), set available quotas, restrict the key to its intended service and configure billing alerts. **Alerts are notifications, not hard spending caps.** Revoke/rotate compromised credentials. Email verification/password-reset delivery, account deletion self-service and stronger public abuse controls remain future hardening work.
 
 ## Validation
 
@@ -92,55 +98,43 @@ npm run build
 npm run start
 ```
 
-Lint uses the ESLint CLI (not removed `next lint`). Tests use Vitest, with Node tests for financial/provider/route boundaries and jsdom + Testing Library for connected component workflows. Provider responses are mocked only in tests.
+ESLint runs directly, not deprecated `next lint`. Vitest covers financial/date/storage boundaries, API schemas and provider failure cases, connected document/grievance editing/copy/regeneration, account ownership and revision checks, and client cloud hydration/autosave/restoration/conflicts. Provider responses are mocked **only in tests**.
 
-See [VERIFICATION.md](./VERIFICATION.md) for the exact checks performed and their limitations. The project also includes a short phase plan in [PROGRESS.md](./PROGRESS.md).
+With a real configured database and a running local server:
 
-Formatting: `npx prettier --write app components lib tests *.ts *.mjs *.json *.md`.
+```powershell
+npm run test:live
+```
 
-## Deploy to Vercel
+This opt-in integration test creates two disposable QA accounts, exercises real authentication, hashed password storage, persistence, isolation, stale-write rejection and re-login, then removes only those account IDs. It never generates a fake AI response inside the app. `TEST_BASE_URL` can select the deployed application.
 
-1. Push this project, including `package-lock.json`, to a Git repository. Exclude `.env.local`, credentials, `node_modules`, and `.next` (already ignored).
-2. Import the repository in Vercel under your intended account/team and project.
-3. Choose the **Next.js** framework preset and set the project root to the directory containing this `package.json`.
-4. Use **Node.js 24.x**, the committed npm lockfile, and standard settings: install `npm ci`, build `npm run build`, framework-managed output directory. Do not use static export.
-5. Add server-only `GEMINI_API_KEY` and `GEMINI_MODEL=gemini-3.5-flash-lite` in Vercel environment settings for the intended Preview/Production environments. Do not prefix the key with `NEXT_PUBLIC_`.
-6. Deploy. Redeploy after environment changes so functions receive the new configuration.
-7. Open the real deployment URL. Repeat earnings add/edit/delete/refresh checks, language persistence, chat in each language, earnings sharing, document fact handoff, draft editing and copy. Verify successful real Gemini requests; a successful page render alone is insufficient.
-8. Inspect Vercel function errors/statuses and usage without logging sensitive inputs. Configure abuse controls and billing alerts before sharing publicly.
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for current deployment/verification results, [PROGRESS.md](./PROGRESS.md) for the phase plan, and [VERIFICATION.md](./VERIFICATION.md) for the initial MVP baseline. Formatting: `npx prettier --write app components lib scripts tests *.ts *.mjs *.json *.md`.
 
-There is no `vercel.json`: standard Next.js deployment defaults are sufficient. No database, writable server storage, Docker, static-only host, or persistent background server is required.
+## Vercel deployment and future updates
 
-**Delivery access limits:** no Gemini key, Vercel CLI/token, connected Vercel deployment tool, linked Vercel project, or Git remote was present during implementation. No deployment URL is claimed. Supply credentials through local/Vercel settings, authenticate Vercel under the intended account, and follow the steps above. Do not paste credentials into chat.
+1. Push the source and lockfile to your GitHub repository, excluding `.env.local`, `.vercel`, credentials, `node_modules` and `.next`.
+2. Import/link the project in the intended Vercel team. Choose **Next.js**, root directory containing `package.json`, **Node.js 24.x**, standard `npm ci` / `npm run build`, and framework-managed output. No `vercel.json` is needed.
+3. Connect a Neon Postgres database through Vercel Marketplace. Use separate branches/databases for preview and production when operating beyond a demo.
+4. Configure the private database/auth/Gemini environment variables above. Set production `BETTER_AUTH_URL` to the actual deployment domain; development to localhost. Preview uses `VERCEL_URL`. Generate secrets privately; do not commit or transmit them in command arguments.
+5. Pull Development environment variables into ignored local configuration, verify required keys by name without printing values, then explicitly run `npm run db:migrate` against the intended database.
+6. Run validation, deploy with Vercel's Git integration or `npx vercel --prod`, then verify real signup/login, records after refresh, isolation, earnings, document handoff and all AI requests. Redeploy after changing environment variables.
+7. Review function statuses and provider usage without logging sensitive request bodies. Configure abuse controls and alerts before public sharing.
 
-## Demo script (about three minutes)
+If connecting a provider reports **OAuth state not found**, restart its authorization from the connection settings in the same browser session. An old callback cannot recreate the missing state. The official Vercel/Git Credential Manager device flows are alternatives for CLI deployment/push.
 
-1. Start with the honest empty dashboard. Add your own disposable example income and expense. Show exact net calculations, edit an entry, refresh, and distinguish recorded data from actual earnings.
-2. Switch to Hindi or Punjabi. Choose Explain my earnings and inspect the data-sharing review. With a real configured key, generate grounded guidance.
-3. Paste a short redacted payment notice. Review privacy, request its explanation, choose relevant facts yourself, and transfer them into a grievance.
-4. Complete the employer, date, and desired resolution; confirm facts. Generate, edit, and copy the draft. Point out that it has not been submitted.
-5. Show an AI error with the key removed in a separate local demo session; the input and earnings remain usable. Remove disposable demo entries afterward.
+## Three-minute demo
+
+Start at the honest empty dashboard, create an account, add disposable income/expense entries, show exact net, refresh and sign in again. Switch to Hindi/Punjabi. Review the earnings-sharing dialog and request real guidance when Gemini is configured. Explain a redacted notice, select confirmed facts, generate an editable grievance and copy it. Show that it has not been submitted. Finish by removing disposable records and signing out.
 
 ## Judging priorities
 
-| Priority | Parameter         | Implementation                                                                                                                                                             |
-| -------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| High     | Code quality      | Strict types; separated UI, translations, finance, storage, schemas, prompts, server-only provider; readable formatting; reproducible lockfile                             |
-| High     | Problem alignment | Worker-focused dashboard; multilingual earnings, safety/rights/schemes chat, documents, and grievances; connected consent/fact-review workflows                            |
-| Medium   | Security          | Server-only key; streaming byte limit; strict server validation; untrusted-source separation; safe text rendering; session-only sensitive text; explicit abuse limitations |
-| Medium   | Efficiency        | Local deterministic calculations; CSS chart; native fetch; bounded context/output/timeout; no database, chart library, SDK, or automatic retries                           |
-| Low      | Testing           | Financial boundaries, storage corruption/failure, API/route validation, provider failure modes, and connected component tests; production build and browser checks         |
-| Low      | Accessibility     | Landmarks, labels, headings, keyboard controls and native dialogs, focus indicators, live statuses, chart text equivalent, reduced-motion support, 360px layout            |
+| Priority | Parameter         | Evidence                                                                                                                                                                    |
+| -------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| High     | Code quality      | Strict types, separated UI/translations/finance/storage/auth/validation/provider, reproducible lockfile and readable formatting                                             |
+| High     | Problem alignment | Worker-focused multilingual dashboard, earnings, rights/safety/schemes assistance, document help and connected grievance flow                                               |
+| Medium   | Security          | Server-only secrets, established password hashing, validated sessions and record ownership, strict bounded bodies, safe text, explicit consent/import and abuse limitations |
+| Medium   | Efficiency        | Local calculations, CSS chart, small reusable Postgres pool, bounded AI context/output/timeout, debounced saving and no automatic model retries                             |
+| Low      | Testing           | Pure-function, route, provider, UI, account isolation/sync and real-database checks; lint/typecheck/build                                                                   |
+| Low      | Accessibility     | Landmarks, labels, keyboard navigation/native dialogs, focus indicators, live statuses, chart text alternative, reduced motion and 360px layouts                            |
 
-## Known limitations
-
-- Real Gemini accuracy, response language, latency, and account/model access require live testing with a configured key. Successful generation was not demonstrated without one.
-- Legal/scheme advice is not verified by retrieval. No OCR, uploads, authentication, complaint submission, external contacts, or benefit applications.
-- Voice permission/recognition and every browser/device combination are not verified. Speech services can require internet access. Clipboard may fail in insecure/denied contexts; manual copy remains available.
-- A full accessibility certification, screen-reader audit, and every enlarged-text/browser combination were not performed.
-- A development-only npm audit advisory remains in `braces` through ESLint's dependency chain, with no patched `braces` release available at review time. Production dependency audit was clean. Do not apply the audit's suggested major downgrade of Next's lint config. Recheck upstream updates before future maintenance.
-- No durable endpoint abuse protection is configured. Shared-device storage and unencrypted earnings remain privacy considerations.
-
-## Source map
-
-`app/` — entry, metadata, global styles and API route. `components/` — shared shell, dashboard/tracker, assistant, document flow, grievance and native dialog. `lib/` — translations, pure finance, storage codec, validated request types, prompts, Gemini, client transport. `tests/` — Node and component tests.
+A development-only advisory remains in `braces` through ESLint's dependency chain with no patched release available when reviewed. Production dependency audit is clean. No formal accessibility certification or exhaustive browser/screen-reader audit is claimed.

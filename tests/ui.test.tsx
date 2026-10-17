@@ -18,6 +18,10 @@ import { AiError } from "../lib/api-validation";
 import { askAi } from "../lib/ai-client";
 vi.mock("../lib/ai-client", () => ({ askAi: vi.fn() }));
 beforeEach(() => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(Response.json({ configured: false, user: null })),
+  );
   localStorage.clear();
   vi.mocked(askAi).mockReset();
   HTMLDialogElement.prototype.showModal = function () {
@@ -36,6 +40,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 function Connected() {
   const [doc, setDoc] = useState(initialDocument),

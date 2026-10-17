@@ -26,6 +26,10 @@ import { Documents, initialDocument } from "./documents";
 import { Grievance, initialGrievance } from "./grievance";
 import { askAi } from "@/lib/ai-client";
 import { AiError } from "@/lib/api-validation";
+import { Account } from "./account";
+import { useCloudAccount } from "@/lib/use-cloud-account";
+import { accountStrings } from "@/lib/account-i18n";
+import type { SavedData } from "@/lib/cloud-data";
 const sections = [
   "dashboard",
   "earnings",
@@ -77,12 +81,35 @@ export function Aasra() {
     [sharing, setSharing] = useState(false);
   const [documentState, setDocumentState] = useState(initialDocument),
     [grievance, setGrievance] = useState(initialGrievance);
+  const [deviceEntries, setDeviceEntries] = useState<Entry[]>([]);
+  const savedData: SavedData = {
+    version: 1,
+    entries,
+    messages: assistant.messages,
+    grievance: {
+      facts: grievance.facts,
+      draft: grievance.draft,
+      outputLanguage: grievance.outputLanguage,
+    },
+  };
+  function hydrateSaved(value: SavedData | null) {
+    setEntries(value?.entries ?? []);
+    setAssistant({ ...initialAssistant, messages: value?.messages ?? [] });
+    setGrievance(
+      value ? { ...initialGrievance, ...value.grievance } : initialGrievance,
+    );
+    setDocumentState(initialDocument);
+  }
+  const cloud = useCloudAccount(savedData, hydrateSaved, ready);
+  const a = accountStrings[language];
   useEffect(() => {
     let active = true;
     queueMicrotask(() => {
       if (!active) return;
       try {
-        setEntries(decodeEntries(localStorage.getItem(STORAGE_KEY)));
+        const stored = decodeEntries(localStorage.getItem(STORAGE_KEY));
+        setEntries(stored);
+        setDeviceEntries(stored);
       } catch {
         setStorageBlocked(true);
         setStatus("storageInvalid");
@@ -106,7 +133,15 @@ export function Aasra() {
     window.scrollTo({ top: 0, behavior: "instant" });
     requestAnimationFrame(() => document.getElementById("main")?.focus());
   }
-  function persist(next: Entry[]) {
+  async function persist(next: Entry[]) {
+    if (cloud.user) {
+      if (await cloud.save({ ...savedData, entries: next })) {
+        setEntries(next);
+        setStatus("");
+        return true;
+      }
+      return false;
+    }
     if (storageBlocked) {
       setStatus("storageInvalid");
       return false;
@@ -114,6 +149,7 @@ export function Aasra() {
     try {
       saveEntries(localStorage, next);
       setEntries(next);
+      setDeviceEntries(next);
       setStatus("saved");
       return true;
     } catch {
@@ -129,6 +165,10 @@ export function Aasra() {
     );
   }
   function explain() {
+    if (assistant.messages.length >= 20) {
+      setStatus("TOO_LARGE");
+      return;
+    }
     if (!summary.count) {
       setStatus("noEntries");
       return;
@@ -212,7 +252,7 @@ export function Aasra() {
         </nav>
         <div className="sidebar-bottom">
           <ShieldCheck size={23} />
-          <p>{t.privacy}</p>
+          <p>{cloud.user ? a.privacy : a.guestPrivacy}</p>
           <span>AASRA</span>
         </div>
       </aside>
@@ -261,6 +301,32 @@ export function Aasra() {
                     ? t.chatIntro
                     : t.sevenDays}
           </p>
+          <Account
+            language={language}
+            user={cloud.user}
+            configured={cloud.configured}
+            status={cloud.status}
+            dirty={cloud.dirty}
+            onRefresh={cloud.reload}
+            onSave={() => cloud.save(savedData)}
+            deviceCount={deviceEntries.length}
+            onImport={async () => {
+              const merged = [
+                ...entries,
+                ...deviceEntries.filter(
+                  (e) => !entries.some((current) => current.id === e.id),
+                ),
+              ];
+              return persist(merged);
+            }}
+            onSignedOut={() => {
+              cloud.reset();
+              setEntries(deviceEntries);
+              setAssistant(initialAssistant);
+              setGrievance(initialGrievance);
+              setDocumentState(initialDocument);
+            }}
+          />
           {status && (
             <p
               role="status"
@@ -271,8 +337,18 @@ export function Aasra() {
               {t[status as keyof typeof t]}
             </p>
           )}
-          {!ready ? (
-            <p role="status">{t.loading}</p>
+          {!ready || cloud.blocked ? (
+            <div className="notice" role="status">
+              {!ready ? t.loading : a[cloud.status]}
+              {cloud.status === "cloudUnavailable" && (
+                <button
+                  className="button secondary"
+                  onClick={() => void cloud.reload()}
+                >
+                  {t.retry}
+                </button>
+              )}
+            </div>
           ) : (
             <>
               <div hidden={section !== "dashboard"}>
@@ -304,6 +380,7 @@ export function Aasra() {
                   language={language}
                   t={t}
                   active={section === "chat"}
+                  persisted={!!cloud.user}
                 />
               </div>
               <div hidden={section !== "documents"}>
@@ -329,6 +406,7 @@ export function Aasra() {
               <div hidden={section !== "grievance"}>
                 <Grievance
                   state={grievance}
+                  persisted={!!cloud.user}
                   setState={setGrievance}
                   language={language}
                   t={t}
@@ -340,7 +418,7 @@ export function Aasra() {
         <footer>
           {t.support}
           <span>
-            <ShieldCheck size={14} /> {t.session}
+            <ShieldCheck size={14} /> {cloud.user ? a.cloud : t.session}
           </span>
         </footer>
       </div>
@@ -375,8 +453,12 @@ export function Aasra() {
             </button>
             <button
               className="button danger"
-              onClick={() => {
-                if (persist(entries.filter((e) => e.id !== pendingDelete.id))) {
+              onClick={async () => {
+                if (
+                  await persist(
+                    entries.filter((e) => e.id !== pendingDelete.id),
+                  )
+                ) {
                   setStatus("deleted");
                   setPendingDelete(null);
                 }

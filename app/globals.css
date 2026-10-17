@@ -1,4 +1,38 @@
 @import "tailwindcss";
+.account-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 11px;
+  font-size: 12px;
+}
+.account-strip > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green);
+}
+.account-strip button {
+  font-size: 12px;
+}
+.account-strip .button {
+  padding: 6px 8px;
+}
+@media (max-width: 760px) {
+  .account-strip {
+    align-items: flex-start;
+    font-size: 11px;
+  }
+  .account-strip > span {
+    max-width: 50%;
+    overflow-wrap: anywhere;
+  }
+}
 .source-text {
   max-height: 220px;
   overflow: auto;

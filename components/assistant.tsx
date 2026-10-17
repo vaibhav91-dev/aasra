@@ -5,6 +5,7 @@ import { askAi } from "@/lib/ai-client";
 import { AiError, type AiRequest, type Message } from "@/lib/api-validation";
 import { locales, type Language, type Strings } from "@/lib/i18n";
 import { summaryContext } from "@/lib/earnings";
+import { accountStrings } from "@/lib/account-i18n";
 type Recognition = {
   lang: string;
   interimResults: boolean;
@@ -41,12 +42,14 @@ export function Assistant({
   language,
   t,
   active,
+  persisted = false,
 }: {
   state: AssistantState;
   setState: React.Dispatch<React.SetStateAction<AssistantState>>;
   language: Language;
   t: Strings;
   active: boolean;
+  persisted?: boolean;
 }) {
   const [supported, setSupported] = useState(false),
     [listening, setListening] = useState(false),
@@ -172,7 +175,9 @@ export function Assistant({
           </span>
           <div>
             <h2>Aasra</h2>
-            <span className="muted">{t.session}</span>
+            <span className="muted">
+              {persisted ? accountStrings[language].cloud : t.session}
+            </span>
           </div>
         </div>
         <button
