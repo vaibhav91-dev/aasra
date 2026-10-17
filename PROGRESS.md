@@ -5,7 +5,7 @@
 1. Complete — verified public `vaibhav91-dev/aasra`; authenticated Vercel and created/linked `pwp3/aasra`; Neon database provisioned after user terms acceptance.
 2. Complete — username/password accounts, per-user saved earnings/chats/grievance forms and drafts, reviewed device import, autosave/retry/conflict handling.
 3. Complete — migrations; 40 automated tests, lint/typecheck/build; real database auth/persistence/isolation/re-login tests; temporary accounts removed.
-4. In progress — push source, publish to Vercel, verify deployed account/data and real Gemini flows. See DEPLOYMENT.md for current evidence.
+4. Complete — source pushed to public GitHub main; production deployed; real deployed account/data and all four Gemini flows passed. Automatic GitHub deployment linking awaits repository access. See DEPLOYMENT.md.
 
 ## Initial MVP phases (historical)
 
@@ -17,3 +17,4 @@
 6. Blocked by access — no Vercel deployment tool, CLI/token/auth, linked project or Git remote; no Gemini key. Deployment and real-provider checks remain pending. README contains exact setup steps. No deployment URL is claimed.
 
 Each phase is checked before continuing. AI is never simulated in the application.
+
