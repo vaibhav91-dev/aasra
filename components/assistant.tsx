@@ -6,6 +6,7 @@ import { AiError, type AiRequest, type Message } from "@/lib/api-validation";
 import { locales, type Language, type Strings } from "@/lib/i18n";
 import { summaryContext } from "@/lib/earnings";
 import { accountStrings } from "@/lib/account-i18n";
+import { GuidanceStarters } from "./guidance-starters";
 type Recognition = {
   lang: string;
   interimResults: boolean;
@@ -190,6 +191,13 @@ export function Assistant({
         </button>
       </div>
       <p className="muted">{t.chatIntro}</p>
+      <GuidanceStarters
+        language={language}
+        disabled={state.busy}
+        onChoose={(prompt) =>
+          setState((s) => ({ ...s, input: prompt, error: "", pending: null }))
+        }
+      />
       <div className="conversation" aria-live="polite" aria-busy={state.busy}>
         {!state.messages.length && !state.busy && (
           <div className="empty">

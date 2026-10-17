@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { translations, type Language } from "@/lib/i18n";
 import { Dashboard, Earnings, SummaryCards } from "./earnings";
+import { GuidanceStarters } from "./guidance-starters";
+import { guidance } from "@/lib/guidance";
 import {
   indiaToday,
   weekSummary,
@@ -352,6 +354,43 @@ export function Aasra() {
           ) : (
             <>
               <div hidden={section !== "dashboard"}>
+                <GuidanceStarters
+                  language={language}
+                  disabled={assistant.busy}
+                  onChoose={(prompt) => {
+                    setAssistant((s) => ({
+                      ...s,
+                      input: prompt,
+                      error: "",
+                      pending: null,
+                    }));
+                    navigate("chat");
+                  }}
+                />
+                <section className="card">
+                  <h2>{guidance[language].journey}</h2>
+                  <p>{guidance[language].steps}</p>
+                  <div className="button-row">
+                    <button
+                      className="button secondary"
+                      onClick={() => navigate("earnings")}
+                    >
+                      {t.add}
+                    </button>
+                    <button
+                      className="button secondary"
+                      onClick={() => navigate("documents")}
+                    >
+                      {t.document}
+                    </button>
+                    <button
+                      className="button secondary"
+                      onClick={() => navigate("grievance")}
+                    >
+                      {t.draft}
+                    </button>
+                  </div>
+                </section>
                 <Dashboard
                   entries={entries}
                   summary={summary}

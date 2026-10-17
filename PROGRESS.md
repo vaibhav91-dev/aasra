@@ -1,5 +1,12 @@
 # Aasra progress
 
+## Presentation improvements
+
+1. Complete — prominent multilingual safety/rights/welfare starters and optional state/work inputs on Overview and AI Help.
+2. Complete — server-owned official source catalog, location-first welfare instructions and eligibility/legal caveats. Reviewed discovery sources, not live scheme retrieval.
+3. Complete — connected journey shortcuts and DEMO.md presentation guide; existing reviewed document-to-grievance handoff and account persistence retained.
+4. In progress — 43 tests, lint, typecheck and build passed; production deployment, real welfare calls and browser review next.
+
 ## Current requested expansion
 
 1. Complete — verified public `vaibhav91-dev/aasra`; authenticated Vercel and created/linked `pwp3/aasra`; Neon database provisioned after user terms acceptance.
@@ -17,5 +24,6 @@
 6. Blocked by access — no Vercel deployment tool, CLI/token/auth, linked project or Git remote; no Gemini key. Deployment and real-provider checks remain pending. README contains exact setup steps. No deployment URL is claimed.
 
 Each phase is checked before continuing. AI is never simulated in the application.
+
 
 

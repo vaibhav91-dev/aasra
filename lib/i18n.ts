@@ -10,7 +10,7 @@ export const en = {
   tagline: "AI Saathi for Gig Workers",
   welcome: "A little clarity. A stronger tomorrow.",
   intro:
-    "Your work matters. Let’s make your earnings and next steps easier to understand.",
+    "A multilingual AI companion that helps gig workers understand their earnings and take their next step.",
   week: "Last 7 days",
   income: "Income",
   expense: "Expenses",
