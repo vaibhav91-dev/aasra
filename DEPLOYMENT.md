@@ -47,3 +47,5 @@ Runtime commit df92db1 deployed automatically: dpl_F4NMGWkZHdXSQWZhA7Gah3sHYmPb,
 Earnings now precede guidance. Guidance uses three colored icon cards and reveals context inputs after selection. Payment journey is an expandable strip; duplicate chat starters removed. Runtime UI commit 2f62adb deployed automatically as dpl_94jSf2zReQUdjt5TzSiAKqywF7Ya, READY. Browser verified expandable fields and editable context handoff; a 390px viewport had scrollWidth equal to clientWidth. Temporary viewport override was reset. Screenshots: polished-desktop.jpg and polished-mobile.jpg.
 
 Location selector now groups all 28 Indian states and 8 Union Territories, with a blank default and translated field/group labels. Region names follow the National Portal directory. Automated checks confirm 36 unique options plus the placeholder.
+
+Dropdown commit 4369ea2 deployed as dpl_78kyQ4FcfdKJhisyn4KzpduHVPLz, READY. Browser confirmed all 28 state and 8 UT options and successfully selected Ladakh. 43 tests, lint, typecheck and production build passed. Screenshot: screenshots/india-dropdown.jpg.
