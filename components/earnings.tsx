@@ -24,6 +24,7 @@ import {
   type EarningsSummary,
 } from "@/lib/earnings";
 import type { Language, Strings } from "@/lib/i18n";
+import { ReadAloudButton } from "./read-aloud-button";
 export function SummaryCards({
   summary,
   language,
@@ -143,10 +144,16 @@ export function Dashboard({
             {displayDate(summary.to, language)}
           </span>
         </div>
-        <button className="button" onClick={() => navigate("earnings")}>
-          <Plus size={17} />
-          {t.add}
-        </button>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <ReadAloudButton
+            text={`${t.week}: ${t.income} ${money(summary.incomePaise, language)}, ${t.expense} ${money(summary.expensePaise, language)}, ${t.net} ${money(summary.netPaise, language)}`}
+            language={language}
+          />
+          <button className="button" onClick={() => navigate("earnings")}>
+            <Plus size={17} />
+            {t.add}
+          </button>
+        </div>
       </div>
       <SummaryCards summary={summary} language={language} t={t} />
       {children}
@@ -338,9 +345,11 @@ export function Earnings({
             }
           }}
         >
-          <label className="field">
+          <label className="field" htmlFor="earnings-type-select">
             {t.type}
             <select
+              id="earnings-type-select"
+              name="earnings-type"
               value={type}
               onChange={(e) => {
                 const next = e.target.value as EntryType;
@@ -352,9 +361,11 @@ export function Earnings({
               <option value="expense">{t.expense}</option>
             </select>
           </label>
-          <label className="field">
+          <label className="field" htmlFor="earnings-amount-input">
             {t.amount}
             <input
+              id="earnings-amount-input"
+              name="earnings-amount"
               aria-describedby={error ? "entry-error" : undefined}
               aria-invalid={error}
               inputMode="decimal"
@@ -362,23 +373,29 @@ export function Earnings({
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
               required
+              aria-required="true"
               maxLength={10}
             />
           </label>
-          <label className="field">
+          <label className="field" htmlFor="earnings-date-input">
             {t.date}
             <input
+              id="earnings-date-input"
+              name="earnings-date"
               type="date"
               value={date}
               min="1900-01-01"
               max={indiaToday()}
               onChange={(e) => setDate(e.target.value)}
               required
+              aria-required="true"
             />
           </label>
-          <label className="field">
+          <label className="field" htmlFor="earnings-category-select">
             {t.category}
             <select
+              id="earnings-category-select"
+              name="earnings-category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >

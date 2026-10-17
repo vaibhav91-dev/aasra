@@ -21,6 +21,7 @@ export function Modal({
       ref={ref}
       className="card modal native-dialog"
       aria-labelledby={id}
+      aria-modal="true"
       onCancel={(e) => {
         e.preventDefault();
         onClose();

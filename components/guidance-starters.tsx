@@ -69,9 +69,14 @@ export function GuidanceStarters({
         >
           <p className="muted">{t.hint}</p>
           <div className="guidance-fields">
-            <label className="field">
+            <label className="field" htmlFor="guidance-state-select">
               {t.state}
-              <select value={state} onChange={(e) => setState(e.target.value)}>
+              <select
+                id="guidance-state-select"
+                name="guidance-state"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+              >
                 <option value="">{regionLabels[language].choose}</option>
                 <optgroup label={regionLabels[language].states}>
                   {indianStates.map((name) => (
@@ -89,9 +94,14 @@ export function GuidanceStarters({
                 </optgroup>
               </select>
             </label>
-            <label className="field">
+            <label className="field" htmlFor="guidance-work-select">
               {t.work}
-              <select value={work} onChange={(e) => setWork(e.target.value)}>
+              <select
+                id="guidance-work-select"
+                name="guidance-work"
+                value={work}
+                onChange={(e) => setWork(e.target.value)}
+              >
                 <option value="">{workerLabels[language].choose}</option>
                 {workerTypes.map((item) => (
                   <option key={item.en} value={item.en}>
@@ -102,13 +112,16 @@ export function GuidanceStarters({
               </select>
             </label>
             {work === "other" && (
-              <label className="field">
+              <label className="field" htmlFor="guidance-other-work-input">
                 {workerLabels[language].specify}
                 <input
+                  id="guidance-other-work-input"
+                  name="guidance-other-work"
                   maxLength={100}
                   value={otherWork}
                   onChange={(e) => setOtherWork(e.target.value)}
                   required
+                  aria-required="true"
                 />
               </label>
             )}

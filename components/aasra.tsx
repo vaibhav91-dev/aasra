@@ -1,5 +1,11 @@
 "use client";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Link from "next/link";
 import {
   House,
@@ -84,16 +90,25 @@ export function Aasra() {
   const [documentState, setDocumentState] = useState(initialDocument),
     [grievance, setGrievance] = useState(initialGrievance);
   const [deviceEntries, setDeviceEntries] = useState<Entry[]>([]);
-  const savedData: SavedData = {
-    version: 1,
-    entries,
-    messages: assistant.messages,
-    grievance: {
-      facts: grievance.facts,
-      draft: grievance.draft,
-      outputLanguage: grievance.outputLanguage,
-    },
-  };
+  const savedData: SavedData = useMemo(
+    () => ({
+      version: 1,
+      entries,
+      messages: assistant.messages,
+      grievance: {
+        facts: grievance.facts,
+        draft: grievance.draft,
+        outputLanguage: grievance.outputLanguage,
+      },
+    }),
+    [
+      entries,
+      assistant.messages,
+      grievance.facts,
+      grievance.draft,
+      grievance.outputLanguage,
+    ],
+  );
   function hydrateSaved(value: SavedData | null) {
     setEntries(value?.entries ?? []);
     setAssistant({ ...initialAssistant, messages: value?.messages ?? [] });
@@ -128,13 +143,16 @@ export function Aasra() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
-  const summary = weekSummary(entries, today || "1970-01-07");
-  function navigate(next: Section) {
+  const summary = useMemo(
+    () => weekSummary(entries, today || "1970-01-07"),
+    [entries, today],
+  );
+  const navigate = useCallback((next: Section) => {
     setSection(next);
     setStatus("");
     window.scrollTo({ top: 0, behavior: "instant" });
     requestAnimationFrame(() => document.getElementById("main")?.focus());
-  }
+  }, []);
   async function persist(next: Entry[]) {
     if (cloud.user) {
       if (await cloud.save({ ...savedData, entries: next })) {
@@ -266,10 +284,12 @@ export function Aasra() {
           <span className="desktop-breadcrumb">
             Aasra <span>/</span> {t[section]}
           </span>
-          <label className="language">
+          <label className="language" htmlFor="app-language-select">
             <Languages size={18} />
             <span className="sr-only">{t.language}</span>
             <select
+              id="app-language-select"
+              name="app-language"
               value={language}
               onChange={(e) => changeLanguage(e.target.value as Language)}
             >
@@ -332,6 +352,7 @@ export function Aasra() {
           {status && (
             <p
               role="status"
+              aria-live="polite"
               className={
                 "notice " + (status.startsWith("storage") ? "error" : "")
               }

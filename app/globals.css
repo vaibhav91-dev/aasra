@@ -1165,3 +1165,41 @@ p {
     transition: none !important;
   }
 }
+
+.listen-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #eef4e9;
+  color: #1b4332;
+  border: 1px solid #dce5db;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.listen-button:hover {
+  background: #e2ece0;
+  transform: translateY(-1px);
+}
+.listen-button[aria-pressed="true"] {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+:focus-visible {
+  outline: 2px solid #1b4332;
+  outline-offset: 2px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #1b4332;
+  outline-offset: 2px;
+}
+
