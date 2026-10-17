@@ -49,3 +49,5 @@ Earnings now precede guidance. Guidance uses three colored icon cards and reveal
 Location selector now groups all 28 Indian states and 8 Union Territories, with a blank default and translated field/group labels. Region names follow the National Portal directory. Automated checks confirm 36 unique options plus the placeholder.
 
 Dropdown commit 4369ea2 deployed as dpl_78kyQ4FcfdKJhisyn4KzpduHVPLz, READY. Browser confirmed all 28 state and 8 UT options and successfully selected Ladakh. 43 tests, lint, typecheck and production build passed. Screenshot: screenshots/india-dropdown.jpg.
+
+Worker selector: 12 multilingual categories plus Other/custom work; no default occupation. Commit a6c397e deployed automatically as dpl_ET3PJDu5ezY7NVxdYprFXx4b3fqb, READY. 43 tests, lint, typecheck and build passed. Browser verified category list and custom input. Evidence: screenshots/worker-dropdown.jpg.

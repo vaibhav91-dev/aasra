@@ -42,4 +42,5 @@ Each phase is checked before continuing. AI is never simulated in the applicatio
 
 
 ## Worker dropdown
-Implemented common worker categories in English/Hindi/Punjabi, blank default and Other with custom description. Verification and deployment in progress.
+Implemented common worker categories in English/Hindi/Punjabi, blank default and Other with custom description. Complete — 43 tests, lint, typecheck and production build passed. Production deployment READY; browser verified all options and Other revealing custom input.
+
