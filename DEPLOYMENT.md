@@ -26,11 +26,12 @@ Updated 17 October 2026 (Asia/Kolkata).
 - Real production database tests passed: account creation, earnings/chat/grievance persistence, revision conflict handling, account isolation, hashed passwords, logout and username/password re-login. Disposable test accounts were cleaned up.
 - All four real production Gemini requests passed with nonempty responses: Hindi assistant, English earnings explanation, Punjabi document explanation and Hindi grievance draft. No mock AI was used.
 - Production browser rendered the dashboard and account dialog with labeled username/password controls and recovery limitations. Account persistence was exercised through real HTTP requests; hydration/autosave/remount behavior through component tests.
-- Automatic GitHub deployments remain pending repository access: GitHub login is connected, but Vercel git connect still fails. User was asked to grant the Vercel GitHub App access to this repository. CLI production deployment is already working.
+- GitHub repository connected successfully after the user granted repository access. Vercel confirms vaibhav91-dev/aasra with production branch main. A documentation push is used to verify automatic deployment.
 
 ## Remaining product limitations
 
 Email verification, password-reset email delivery and account deletion self-service are not configured. Use strong unique passwords. The UI explains recovery limitations. Public AI endpoint infrastructure abuse controls/provider quotas/billing alerts require operator attention; alerts are not spending caps. Preview/Development and Production currently share the provisioned demo database; use separate database branches before a broader rollout.
 
 See README for setup, privacy and maintenance. VERIFICATION.md documents the original session-only MVP and is historical; this report supersedes its original deployment-access blocker and sensitive-state persistence behavior.
+
 
