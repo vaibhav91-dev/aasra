@@ -35,3 +35,9 @@ Email verification, password-reset email delivery and account deletion self-serv
 See README for setup, privacy and maintenance. VERIFICATION.md documents the original session-only MVP and is historical; this report supersedes its original deployment-access blocker and sensitive-state persistence behavior.
 
 
+
+## Presentation improvements — 17 October 2026
+
+Runtime commit df92db1 deployed automatically: dpl_F4NMGWkZHdXSQWZhA7Gah3sHYmPb, READY. The public aasra-one.vercel.app domain served the new content. Added multilingual safety/rights/welfare starters, optional location/work context, official starting-point links and server-owned reviewed source catalog. This is bounded source-backed discovery guidance, not live scheme retrieval or verified eligibility. Added connected journey navigation and DEMO.md with clearly synthetic presentation facts. No fake data is inserted into the application.
+
+43 tests, lint, strict typecheck and production build passed. Real deployed Gemini tests passed: missing state/work caused clarification; Punjab delivery context produced official myScheme/e-Shram URLs and eligibility verification guidance. Production browser verified all starters, source links, caveats and entered state/work transfer into the editable chat question. Responsive mobile and desktop rendering observed; screenshot in screenshots/guidance-production.jpg. Existing document-to-grievance component and cloud persistence tests remain passing; this change did not repeat the entire authenticated journey manually in the browser.
