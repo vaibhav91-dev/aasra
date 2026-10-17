@@ -8,13 +8,15 @@ afterEach(cleanup);
 it("carries only entered location and work context into an editable starter", () => {
   const choose = vi.fn();
   render(<GuidanceStarters language="en" onChoose={choose} />);
+  expect(screen.queryByLabelText("State or Union Territory")).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Find welfare schemes" }));
   fireEvent.change(screen.getByLabelText("State or Union Territory"), {
     target: { value: "Punjab" },
   });
   fireEvent.change(screen.getByLabelText("Type of work"), {
     target: { value: "Delivery partner" },
   });
-  fireEvent.click(screen.getByRole("button", { name: "Find welfare schemes" }));
+  fireEvent.click(screen.getByRole("button", { name: "Ask Aasra" }));
   expect(choose.mock.calls[0][0]).toContain("State or Union Territory: Punjab");
   expect(choose.mock.calls[0][0]).toContain("Type of work: Delivery partner");
   expect(

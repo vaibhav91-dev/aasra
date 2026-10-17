@@ -119,6 +119,7 @@ export function Dashboard({
   t,
   navigate,
   onExplain,
+  children,
 }: {
   entries: Entry[];
   summary: EarningsSummary;
@@ -126,6 +127,7 @@ export function Dashboard({
   t: Strings;
   navigate: (s: "earnings" | "chat" | "documents" | "grievance") => void;
   onExplain: () => void;
+  children?: React.ReactNode;
 }) {
   const maximum = Math.max(
     1,
@@ -147,6 +149,7 @@ export function Dashboard({
         </button>
       </div>
       <SummaryCards summary={summary} language={language} t={t} />
+      {children}
       <div className="dashboard-columns">
         <section className="card">
           <div className="section-heading">

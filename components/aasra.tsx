@@ -354,43 +354,6 @@ export function Aasra() {
           ) : (
             <>
               <div hidden={section !== "dashboard"}>
-                <GuidanceStarters
-                  language={language}
-                  disabled={assistant.busy}
-                  onChoose={(prompt) => {
-                    setAssistant((s) => ({
-                      ...s,
-                      input: prompt,
-                      error: "",
-                      pending: null,
-                    }));
-                    navigate("chat");
-                  }}
-                />
-                <section className="card">
-                  <h2>{guidance[language].journey}</h2>
-                  <p>{guidance[language].steps}</p>
-                  <div className="button-row">
-                    <button
-                      className="button secondary"
-                      onClick={() => navigate("earnings")}
-                    >
-                      {t.add}
-                    </button>
-                    <button
-                      className="button secondary"
-                      onClick={() => navigate("documents")}
-                    >
-                      {t.document}
-                    </button>
-                    <button
-                      className="button secondary"
-                      onClick={() => navigate("grievance")}
-                    >
-                      {t.draft}
-                    </button>
-                  </div>
-                </section>
                 <Dashboard
                   entries={entries}
                   summary={summary}
@@ -398,7 +361,50 @@ export function Aasra() {
                   t={t}
                   navigate={navigate}
                   onExplain={explain}
-                />
+                >
+                  <GuidanceStarters
+                    language={language}
+                    disabled={assistant.busy}
+                    onChoose={(prompt) => {
+                      setAssistant((s) => ({
+                        ...s,
+                        input: prompt,
+                        error: "",
+                        pending: null,
+                      }));
+                      navigate("chat");
+                    }}
+                  />
+                  <section className="payment-journey">
+                    <details>
+                      <summary>
+                        {t.paymentConcern}
+                        <span aria-hidden="true"> ↗</span>
+                      </summary>
+                      <p className="muted">{guidance[language].steps}</p>
+                      <div className="button-row">
+                        <button
+                          className="button secondary"
+                          onClick={() => navigate("earnings")}
+                        >
+                          {t.add}
+                        </button>
+                        <button
+                          className="button secondary"
+                          onClick={() => navigate("documents")}
+                        >
+                          {t.document}
+                        </button>
+                        <button
+                          className="button secondary"
+                          onClick={() => navigate("grievance")}
+                        >
+                          {t.draft}
+                        </button>
+                      </div>
+                    </details>
+                  </section>
+                </Dashboard>
               </div>
               <div hidden={section !== "earnings"}>
                 <Earnings

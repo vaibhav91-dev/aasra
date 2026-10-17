@@ -1,5 +1,10 @@
 # Aasra progress
 
+## UI polish
+
+1. Complete — earnings-first hierarchy, three icon cards, location fields revealed after selection, compact expandable payment journey, less repeated chat text.
+2. In progress — 43 tests, lint and strict typecheck passed; production build and deployed responsive browser checks next.
+
 ## Presentation improvements
 
 1. Complete — prominent multilingual safety/rights/welfare starters and optional state/work inputs on Overview and AI Help.
@@ -24,6 +29,7 @@
 6. Blocked by access — no Vercel deployment tool, CLI/token/auth, linked project or Git remote; no Gemini key. Deployment and real-provider checks remain pending. README contains exact setup steps. No deployment URL is claimed.
 
 Each phase is checked before continuing. AI is never simulated in the application.
+
 
 
 

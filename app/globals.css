@@ -1,4 +1,118 @@
 @import "tailwindcss";
+.guidance-starters h2 {
+  margin-bottom: 14px;
+}
+.guidance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.guidance-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 20px 18px;
+  min-height: 98px;
+  border: 1px solid #dce5db;
+  border-radius: 16px;
+  background: #eef4e9;
+  color: #254c3c;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.guidance-card.rights {
+  background: #f5f0e5;
+  border-color: #e7dfcc;
+  color: #665228;
+}
+.guidance-card.welfare {
+  background: #eaf1f4;
+  border-color: #d5e2e8;
+  color: #355a6a;
+}
+.guidance-card strong {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.guidance-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: #ffffffb3;
+}
+.guidance-card:hover:not(:disabled),
+.guidance-card[aria-expanded="true"] {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px #213e3410;
+}
+.guidance-context {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  margin-top: 12px;
+  background: #fff;
+}
+.guidance-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 18px 0;
+}
+.guidance-context > .muted {
+  margin: 14px 0;
+}
+.payment-journey {
+  border: 1px solid #dce5db;
+  border-radius: 14px;
+  padding: 17px 20px;
+  background: #fff;
+}
+.payment-journey summary {
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 28px;
+}
+.payment-journey details[open] summary {
+  margin-bottom: 14px;
+}
+.payment-journey .button-row {
+  margin-top: 14px;
+}
+.assistant > .guidance-starters {
+  margin: 22px 0 8px;
+}
+.assistant .guidance-card {
+  padding: 14px 12px;
+  gap: 8px;
+}
+.assistant .guidance-icon {
+  width: 32px;
+  height: 36px;
+}
+@media (max-width: 760px) {
+  .guidance-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  .guidance-card {
+    min-height: 72px;
+    padding: 14px 16px;
+  }
+  .guidance-fields {
+    grid-template-columns: 1fr;
+  }
+  .guidance-context {
+    padding: 17px;
+  }
+}
 .account-strip {
   display: flex;
   align-items: center;

@@ -206,29 +206,6 @@ export function Assistant({
             </div>
             <h2>{t.chatTitle}</h2>
             <p>{t.noHistory}</p>
-            <div className="prompt-grid">
-              {[
-                t.earningsPrompt,
-                t.safetyPrompt,
-                t.rightsPrompt,
-                t.schemePrompt,
-              ].map((prompt) => (
-                <button
-                  className="prompt"
-                  key={prompt}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      input: prompt,
-                      error: "",
-                      pending: null,
-                    }))
-                  }
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
           </div>
         )}
         {state.messages.map((message, i) => (
