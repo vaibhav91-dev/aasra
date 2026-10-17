@@ -40,3 +40,6 @@ Each phase is checked before continuing. AI is never simulated in the applicatio
 
 
 
+
+## Worker dropdown
+Implemented common worker categories in English/Hindi/Punjabi, blank default and Other with custom description. Verification and deployment in progress.

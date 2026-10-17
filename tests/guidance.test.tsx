@@ -14,7 +14,11 @@ it("carries only entered location and work context into an editable starter", ()
   expect(indianStates).toHaveLength(28);
   expect(unionTerritories).toHaveLength(8);
   expect(new Set([...indianStates, ...unionTerritories]).size).toBe(36);
-  expect(screen.getAllByRole("option")).toHaveLength(37);
+  expect(
+    screen
+      .getByLabelText("State or Union Territory")
+      .querySelectorAll("option"),
+  ).toHaveLength(37);
   fireEvent.change(screen.getByLabelText("State or Union Territory"), {
     target: { value: "Punjab" },
   });
