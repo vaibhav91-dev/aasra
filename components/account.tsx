@@ -152,9 +152,11 @@ export function Account({
               }}
             >
               <p className="muted">{a.loginHint}</p>
-              <label className="field">
+              <label className="field" htmlFor="account-username-input">
                 {a.username}
                 <input
+                  id="account-username-input"
+                  name="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   autoComplete="username"
@@ -163,26 +165,32 @@ export function Account({
                   pattern="[A-Za-z0-9_.]{3,30}"
                   disabled={busy}
                   required
+                  aria-required="true"
                 />
                 <span className="muted">{a.usernameHint}</span>
               </label>
               {signup && (
-                <label className="field">
+                <label className="field" htmlFor="account-email-input">
                   {a.email}
                   <input
+                    id="account-email-input"
+                    name="email"
                     type="email"
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    aria-required="true"
                     disabled={busy}
                     maxLength={254}
                   />
                 </label>
               )}
-              <label className="field">
+              <label className="field" htmlFor="account-password-input">
                 {a.password}
                 <input
+                  id="account-password-input"
+                  name="password"
                   type="password"
                   autoComplete={signup ? "new-password" : "current-password"}
                   minLength={12}
@@ -190,6 +198,7 @@ export function Account({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  aria-required="true"
                   disabled={busy}
                 />
                 <span className="muted">{a.passwordHint}</span>

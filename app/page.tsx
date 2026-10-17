@@ -1,4 +1,10 @@
 import { Aasra } from "@/components/aasra";
+import { ErrorBoundary } from "@/components/error-boundary";
+
 export default function Page() {
-  return <Aasra />;
+  return (
+    <ErrorBoundary>
+      <Aasra />
+    </ErrorBoundary>
+  );
 }

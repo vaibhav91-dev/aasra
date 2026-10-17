@@ -11,6 +11,8 @@ import {
 import { indiaToday } from "@/lib/earnings";
 import type { Language, Strings } from "@/lib/i18n";
 import { accountStrings } from "@/lib/account-i18n";
+import { ReadAloudButton } from "./read-aloud-button";
+
 export type GrievanceState = {
   facts: GrievanceFacts;
   draft: string;
@@ -106,29 +108,38 @@ export function Grievance({
           }}
           className="form-grid"
         >
-          <label className="field">
+          <label className="field" htmlFor="grievance-name">
             {t.name}
             <input
+              id="grievance-name"
+              name="worker-name"
+              autoComplete="name"
               value={state.facts.name}
               onChange={(e) => change("name", e.target.value)}
               maxLength={100}
               disabled={state.busy}
             />
           </label>
-          <label className="field">
+          <label className="field" htmlFor="grievance-employer">
             {t.employer}
             <input
+              id="grievance-employer"
+              name="employer-name"
+              autoComplete="organization"
               value={state.facts.employer}
               onChange={(e) => change("employer", e.target.value)}
               maxLength={160}
               required
+              aria-required="true"
               disabled={state.busy}
               aria-describedby="grievance-error"
             />
           </label>
-          <label className="field">
+          <label className="field" htmlFor="grievance-issue">
             {t.issue}
             <select
+              id="grievance-issue"
+              name="grievance-issue"
               value={state.facts.issue}
               onChange={(e) =>
                 change("issue", e.target.value as GrievanceFacts["issue"])
@@ -142,22 +153,27 @@ export function Grievance({
               ))}
             </select>
           </label>
-          <label className="field">
+          <label className="field" htmlFor="grievance-incident">
             {t.incident}
             <input
+              id="grievance-incident"
+              name="incident-date"
               type="date"
               min="1900-01-01"
               max={indiaToday()}
               value={state.facts.incident}
               onChange={(e) => change("incident", e.target.value)}
               required
+              aria-required="true"
               disabled={state.busy}
               aria-describedby="grievance-error"
             />
           </label>
-          <label className="field">
+          <label className="field" htmlFor="grievance-disputed">
             {t.disputed}
             <input
+              id="grievance-disputed"
+              name="disputed-amount"
               inputMode="decimal"
               value={state.facts.disputed}
               onChange={(e) => change("disputed", e.target.value)}
@@ -166,9 +182,11 @@ export function Grievance({
               aria-describedby="grievance-error"
             />
           </label>
-          <label className="field">
+          <label className="field" htmlFor="grievance-output-language">
             {t.outputLanguage}
             <select
+              id="grievance-output-language"
+              name="output-language"
               value={state.outputLanguage ?? language}
               onChange={(e) =>
                 setState((s) => ({
@@ -183,14 +201,17 @@ export function Grievance({
               <option value="pa">ਪੰਜਾਬੀ</option>
             </select>
           </label>
-          <label className="field full">
+          <label className="field full" htmlFor="grievance-description">
             {t.description}
             <textarea
+              id="grievance-description"
+              name="grievance-description"
               value={state.facts.description}
               onChange={(e) => change("description", e.target.value)}
               minLength={10}
               maxLength={3000}
               required
+              aria-required="true"
               disabled={state.busy}
               aria-describedby="grievance-error"
             />
@@ -198,14 +219,17 @@ export function Grievance({
               {state.facts.description.length}/3000
             </span>
           </label>
-          <label className="field full">
+          <label className="field full" htmlFor="grievance-resolution">
             {t.resolution}
             <textarea
+              id="grievance-resolution"
+              name="grievance-resolution"
               value={state.facts.resolution}
               onChange={(e) => change("resolution", e.target.value)}
               minLength={3}
               maxLength={1000}
               required
+              aria-required="true"
               disabled={state.busy}
               aria-describedby="grievance-error"
             />
@@ -213,14 +237,17 @@ export function Grievance({
               {state.facts.resolution.length}/1000
             </span>
           </label>
-          <label className="checkbox full">
+          <label className="checkbox full" htmlFor="grievance-confirmed-check">
             <input
+              id="grievance-confirmed-check"
+              name="confirmed-check"
               type="checkbox"
               checked={state.confirmed}
               onChange={(e) =>
                 setState((s) => ({ ...s, confirmed: e.target.checked }))
               }
               required
+              aria-required="true"
               disabled={state.busy}
             />
             {t.review}
@@ -262,36 +289,53 @@ export function Grievance({
       </section>
       {state.draft && (
         <section className="card">
-          <label className="field">
-            {t.draftLabel}
-            <textarea
-              lang={state.outputLanguage ?? language}
-              rows={18}
-              value={state.draft}
-              onChange={(e) => {
-                setState((s) => ({ ...s, draft: e.target.value }));
-                setCopyStatus("");
-              }}
-              maxLength={20000}
-            />
-          </label>
-          <p className="muted">{t.aiNotice}</p>
-          <button
-            className="button secondary"
-            disabled={!state.draft.trim()}
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(state.draft);
-                setCopyStatus("copied");
-              } catch {
-                setCopyStatus("copyError");
-              }
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "10px",
             }}
           >
-            <Copy size={17} />
-            {t.copy}
-          </button>
-          <p role="status" className="muted">
+            <label className="field" htmlFor="grievance-draft-text" style={{ margin: 0 }}>
+              {t.draftLabel}
+            </label>
+            <ReadAloudButton
+              text={state.draft}
+              language={state.outputLanguage ?? language}
+            />
+          </div>
+          <textarea
+            id="grievance-draft-text"
+            name="grievance-draft"
+            lang={state.outputLanguage ?? language}
+            rows={18}
+            value={state.draft}
+            onChange={(e) => {
+              setState((s) => ({ ...s, draft: e.target.value }));
+              setCopyStatus("");
+            }}
+            maxLength={20000}
+          />
+          <p className="muted">{t.aiNotice}</p>
+          <div className="button-row" style={{ marginTop: "12px" }}>
+            <button
+              className="button secondary"
+              disabled={!state.draft.trim()}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(state.draft);
+                  setCopyStatus("copied");
+                } catch {
+                  setCopyStatus("copyError");
+                }
+              }}
+            >
+              <Copy size={17} />
+              {t.copy}
+            </button>
+          </div>
+          <p role="status" aria-live="polite" className="muted" style={{ minHeight: "20px", marginTop: "8px" }}>
             {copyStatus ? t[copyStatus as keyof Strings] : ""}
           </p>
         </section>

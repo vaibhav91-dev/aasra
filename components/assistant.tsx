@@ -7,22 +7,9 @@ import { locales, type Language, type Strings } from "@/lib/i18n";
 import { summaryContext } from "@/lib/earnings";
 import { accountStrings } from "@/lib/account-i18n";
 import { GuidanceStarters } from "./guidance-starters";
-type Recognition = {
-  lang: string;
-  interimResults: boolean;
-  continuous: boolean;
-  onresult:
-    | ((event: {
-        results: ArrayLike<ArrayLike<{ transcript: string }>>;
-      }) => void)
-    | null;
-  onerror: ((event: { error: string }) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-};
-type RecognitionConstructor = new () => Recognition;
+import { ReadAloudButton } from "./read-aloud-button";
+import type { SpeechRecognitionInstance } from "@/types/speech";
+
 export type AssistantState = {
   messages: Message[];
   input: string;
@@ -55,35 +42,34 @@ export function Assistant({
   const [supported, setSupported] = useState(false),
     [listening, setListening] = useState(false),
     [voiceError, setVoiceError] = useState(false);
-  const recognition = useRef<Recognition | null>(null),
+  const recognition = useRef<SpeechRecognitionInstance | null>(null),
     lock = useRef(false),
     end = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const win = window as unknown as {
-      SpeechRecognition?: RecognitionConstructor;
-      webkitSpeechRecognition?: RecognitionConstructor;
-    };
     queueMicrotask(() =>
-      setSupported(!!(win.SpeechRecognition || win.webkitSpeechRecognition)),
+      setSupported(
+        typeof window !== "undefined" &&
+          !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+      ),
     );
     return () => recognition.current?.abort();
   }, []);
+
   useEffect(() => {
     if (!active) recognition.current?.abort();
   }, [active]);
+
   useEffect(() => {
     end.current?.scrollIntoView({ block: "nearest" });
   }, [state.messages, state.busy]);
+
   function voice() {
     if (listening) {
       recognition.current?.stop();
       return;
     }
-    const win = window as unknown as {
-      SpeechRecognition?: RecognitionConstructor;
-      webkitSpeechRecognition?: RecognitionConstructor;
-    };
-    const Ctor = win.SpeechRecognition || win.webkitSpeechRecognition;
+    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) return;
     const r = new Ctor();
     recognition.current = r;
@@ -111,6 +97,7 @@ export function Assistant({
       setVoiceError(true);
     }
   }
+
   async function submit(retry = false) {
     if (lock.current || state.busy) return;
     const input = state.input.trim();
@@ -167,6 +154,7 @@ export function Assistant({
       lock.current = false;
     }
   }
+
   return (
     <section className="card assistant">
       <div className="section-heading">
@@ -210,7 +198,24 @@ export function Assistant({
         )}
         {state.messages.map((message, i) => (
           <div className={"message " + message.role} key={i}>
-            <strong>{message.role === "assistant" ? "Aasra" : t.input}</strong>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "6px",
+              }}
+            >
+              <strong>
+                {message.role === "assistant" ? "Aasra" : t.input}
+              </strong>
+              {message.role === "assistant" && (
+                <ReadAloudButton
+                  text={message.text}
+                  language={language}
+                />
+              )}
+            </div>
             <div className="text-output">{message.text}</div>
           </div>
         ))}
@@ -239,9 +244,11 @@ export function Assistant({
           void submit();
         }}
       >
-        <label className="field">
+        <label className="field" htmlFor="assistant-input-field">
           {t.input}
           <textarea
+            id="assistant-input-field"
+            name="assistant-input"
             value={state.input}
             maxLength={3000}
             onChange={(e) =>
@@ -255,6 +262,7 @@ export function Assistant({
             rows={3}
             disabled={state.busy}
             required
+            aria-required="true"
           />
         </label>
         <p className="counter">{state.input.length}/3000</p>

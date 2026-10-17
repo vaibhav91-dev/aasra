@@ -5,6 +5,8 @@ import { askAi } from "@/lib/ai-client";
 import { AiError } from "@/lib/api-validation";
 import type { Language, Strings } from "@/lib/i18n";
 import { Modal } from "./modal";
+import { ReadAloudButton } from "./read-aloud-button";
+
 export type DocumentState = {
   text: string;
   consent: boolean;
@@ -40,6 +42,7 @@ export function Documents({
   const [transfer, setTransfer] = useState(false),
     [facts, setFacts] = useState(""),
     [confirmed, setConfirmed] = useState(false);
+
   async function explain() {
     if (lock.current) return;
     if (
@@ -75,6 +78,7 @@ export function Documents({
       lock.current = false;
     }
   }
+
   return (
     <div className="stack">
       <section className="card">
@@ -90,9 +94,11 @@ export function Documents({
           }}
           className="stack"
         >
-          <label className="field">
+          <label className="field" htmlFor="document-input-text">
             {t.docLabel}
             <textarea
+              id="document-input-text"
+              name="document-text"
               value={state.text}
               minLength={10}
               maxLength={8000}
@@ -108,13 +114,16 @@ export function Documents({
               }
               aria-describedby="doc-count doc-error"
               required
+              aria-required="true"
             />
           </label>
           <span id="doc-count" className="counter">
             {state.text.length}/8000
           </span>
-          <label className="checkbox">
+          <label className="checkbox" htmlFor="document-consent-check">
             <input
+              id="document-consent-check"
+              name="document-consent"
               type="checkbox"
               checked={state.consent}
               disabled={state.busy || transferDisabled}
@@ -122,6 +131,7 @@ export function Documents({
                 setState((s) => ({ ...s, consent: e.target.checked }))
               }
               required
+              aria-required="true"
             />
             {t.docConsent}
           </label>
@@ -155,7 +165,17 @@ export function Documents({
       </section>
       {state.explanation && (
         <section className="card">
-          <h2>{t.docSubmit}</h2>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "14px",
+            }}
+          >
+            <h2>{t.docSubmit}</h2>
+            <ReadAloudButton text={state.explanation} language={language} />
+          </div>
           <div className="text-output">{state.explanation}</div>
           <p className="notice">{t.aiNotice}</p>
           <button
@@ -179,9 +199,11 @@ export function Documents({
             <summary>{t.docLabel}</summary>
             <div className="text-output source-text">{state.explainedText}</div>
           </details>
-          <label className="field">
+          <label className="field" htmlFor="confirmed-facts-text">
             {t.confirmedFacts}
             <textarea
+              id="confirmed-facts-text"
+              name="confirmed-facts"
               value={facts}
               onChange={(e) => {
                 setFacts(e.target.value);
@@ -193,8 +215,10 @@ export function Documents({
             />
           </label>
           <p className="counter">{facts.length}/3000</p>
-          <label className="checkbox">
+          <label className="checkbox" htmlFor="confirmed-review-check">
             <input
+              id="confirmed-review-check"
+              name="confirmed-review"
               type="checkbox"
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
