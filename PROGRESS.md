@@ -1,9 +1,13 @@
 # Aasra progress
 
+## India location selector
+
+All 28 states and 8 Union Territories added in grouped native dropdowns, with translated labels and no location preselected. Tests verify 36 unique regions and context handoff. Deployment verification in progress.
+
 ## UI polish
 
 1. Complete — earnings-first hierarchy, three icon cards, location fields revealed after selection, compact expandable payment journey, less repeated chat text.
-2. In progress — 43 tests, lint and strict typecheck passed; production build and deployed responsive browser checks next.
+2. Complete — 43 tests, lint/typecheck/build passed; automatic production deploy ready; desktop/mobile reviewed and 390px layout has no horizontal overflow. Location handoff preserved.
 
 ## Presentation improvements
 
@@ -29,6 +33,7 @@
 6. Blocked by access — no Vercel deployment tool, CLI/token/auth, linked project or Git remote; no Gemini key. Deployment and real-provider checks remain pending. README contains exact setup steps. No deployment URL is claimed.
 
 Each phase is checked before continuing. AI is never simulated in the application.
+
 
 
 

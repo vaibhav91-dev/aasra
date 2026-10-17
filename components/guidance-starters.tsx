@@ -4,6 +4,11 @@ import { ArrowUpRight, ShieldCheck, Scale, HeartHandshake } from "lucide-react";
 import { translations } from "@/lib/i18n";
 import type { Language } from "@/lib/i18n";
 import { guidance, officialSources } from "@/lib/guidance";
+import {
+  indianStates,
+  unionTerritories,
+  regionLabels,
+} from "@/lib/india-regions";
 
 export function GuidanceStarters({
   language,
@@ -60,11 +65,23 @@ export function GuidanceStarters({
           <div className="guidance-fields">
             <label className="field">
               {t.state}
-              <input
-                maxLength={80}
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-              />
+              <select value={state} onChange={(e) => setState(e.target.value)}>
+                <option value="">{regionLabels[language].choose}</option>
+                <optgroup label={regionLabels[language].states}>
+                  {indianStates.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label={regionLabels[language].territories}>
+                  {unionTerritories.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
             </label>
             <label className="field">
               {t.work}

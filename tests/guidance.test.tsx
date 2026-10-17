@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { GuidanceStarters } from "../components/guidance-starters";
 import { buildPrompt } from "../lib/prompts";
+import { indianStates, unionTerritories } from "../lib/india-regions";
 afterEach(cleanup);
 
 it("carries only entered location and work context into an editable starter", () => {
@@ -10,6 +11,10 @@ it("carries only entered location and work context into an editable starter", ()
   render(<GuidanceStarters language="en" onChoose={choose} />);
   expect(screen.queryByLabelText("State or Union Territory")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Find welfare schemes" }));
+  expect(indianStates).toHaveLength(28);
+  expect(unionTerritories).toHaveLength(8);
+  expect(new Set([...indianStates, ...unionTerritories]).size).toBe(36);
+  expect(screen.getAllByRole("option")).toHaveLength(37);
   fireEvent.change(screen.getByLabelText("State or Union Territory"), {
     target: { value: "Punjab" },
   });
